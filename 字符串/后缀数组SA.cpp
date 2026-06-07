@@ -10,6 +10,11 @@ struct SA {
     vector<int>cnt;// 用于排序
     vector<int>old;// 用于排序
 
+    vector<int>height;// height数组，height[i]为排名为i的后缀和排名为i-1的后缀的LCP（最长公共前缀）
+    // 即  height[i]= LCP(sa[i],sa[i-1]);
+    // 引理1：LCP(sa[i],sa[j])= \min height[ i+1, ... ,j ]
+    // 引理2：字符串不同子串个数为：n(n+1)/2 - \sum height
+
     SA(const string &s) {//传入原始字符串
         init(s);
     }
@@ -35,6 +40,14 @@ struct SA {
                 if (rk[i] == n - 1)k = n;
             }
             k <<= 1;
+        }
+        // 以下为 构建 height 数组的过程：O(n)
+        height = vector<int>(n, 0);
+        for (int i = 0, len = 0;i < n;++i) {
+            if (rk[i] == 0)continue;
+            if (len)--len;
+            while (s[i + len] == s[sa[rk[i] - 1] + len])++len;//末尾'\0'，故不存在越界 
+            height[rk[i]] = len;
         }
     }
 
